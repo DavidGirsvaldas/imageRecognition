@@ -1,3 +1,5 @@
+import glob
+
 import imageio
 import numpy as np
 from PIL import Image
@@ -19,25 +21,35 @@ def init():
 
 model = init()
 
+labels = {
+    0: "airplane",
+    1: "automobile",
+    2: "bird",
+    3: "cat",
+    4: "deer",
+    5: "dog",
+    6: "frog",
+    7: "horse",
+    8: "ship",
+    9: "truck",
+}
+
 
 def predict():
-    # read the image into memory
-    foo = Image.open("test1.jpeg")
-    foo = foo.resize((32, 32), Image.ANTIALIAS)
-    foo.save("test4.jpeg")
-    x = imageio.imread("test4.jpeg")
-    print(x.shape)
-    # make it the right size
-    x = x.reshape(-1, 32, 32, 3)
-    # in our computation graph
-    # perform the prediction
-    out = model.predict(x)
-    # make class predictions with the model
-    print(out)
-    print(np.argmax(out, axis=1))
-    # convert the response to a string
-    response = np.argmax(out, axis=1)
-    return str(response[0])
+    for filename in glob.iglob("testImages/*"):
+        # read the image into memory
+        foo = Image.open(filename)
+        foo = foo.resize((32, 32), Image.ANTIALIAS)
+        foo.save("resized.jpeg")
+        x = imageio.imread("resized.jpeg")
+        print("Image " + filename)
+        # make it the right size
+        x = x.reshape(-1, 32, 32, 3)
+        # in our computation graph
+        # perform the prediction
+        out = model.predict(x)
+        for i in range(out.shape[1]):
+            print(labels[i] + " " + str(out[0][i]))
 
 
 predict()
